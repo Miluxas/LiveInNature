@@ -1,113 +1,103 @@
 import React, { Component } from 'react'
-import {Container,Row,Col,OverlayTrigger,Button} from 'react-bootstrap'
-import './style.css'
-import UserSideBar from './components/UserSideBar'
-import RightSideBar from './components/RightSideBar'
 import PostContainer from './components/PostContainer'
-import { auth ,provider} from './firebase'
+import { auth, provider } from './firebase'
+import { Layout, Row, Col } from 'antd'
+import UserSideBar from './components/UserSideBar'
 import LoginForm from './components/LoginForm'
-import ConnectionManagment from './components/ConnectionManagment'
-import MyWall from './components/MyWall';
-import UserLogo from './components/UserLogo';
+
+const { Sider, Content } = Layout;
 
 class MainPage extends Component {
-    constructor(props){
-      super(props)
-      this.state={  searchText:'',
-                    logedIn:null,
-                    page:'PostContainer',
-                    loginModalShow:false,
-                    width:window.innerWidth
-                  }
-      this.login=this.login.bind(this);
-      this.logout=this.logout.bind(this);
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchText: '',
+      logedIn: null,
+      loginModalShow: false,
+      width: window.innerWidth,
+      pageContent: <PostContainer></PostContainer>
     }
-    login(){
-      //auth.signInWithPopup('miluxas@yahoo.com','Qaz123')
-      auth.signInWithPopup(provider)
-     .then((result) => {
-        if(result.user)
-          this.setState({logedIn:true})
-         //this.props.onAuthStateChanged(result.user)
-         this.render();
-     });
+    this.login = this.login.bind(this)
+    this.logout = this.logout.bind(this)
+    this.setPage = this.setPage.bind(this)
   }
-
-  logout(){
-      auth.signOut() 
-      .then(() => {
-        this.setState({logedIn:false})
+  login() {
+    auth.signInWithPopup(provider)
+      .then((result) => {
+        if (result.user)
+          this.setState({ logedIn: true })
+        this.render();
       });
   }
-  componentWillMount(){
+
+  logout() {
+    auth.signOut()
+      .then(() => {
+        this.setState({ logedIn: false })
+      });
+  }
+  componentWillMount() {
 
   }
   componentDidMount() {
-    
-    this.updateDimensions();
-    window.addEventListener("resize", this.updateDimensions.bind(this));
+
+    //this.updateDimensions();
+    //window.addEventListener("resize", this.updateDimensions.bind(this));
     auth.onAuthStateChanged((user) => {
       if (user) {
-        this.setState({logedIn:true})
-      }else
-    {
-      this.setState({logedIn:false})
-    }})
+        this.setState({ logedIn: true })
+      } else {
+        this.setState({ logedIn: false })
+      }
+    })
   }
 
-  
- updateDimensions() {
-  this.setState({width:window.innerWidth})
- }
-
-
- /**
-  * Remove event listener
-  */
- componentWillUnmount() {
-   window.removeEventListener("resize", this.updateDimensions.bind(this));
- }
-
-  render() { 
-    let intou=null;
-    switch(this.state.page)
-    {
-      case 'PostContainer':
-      intou= <PostContainer></PostContainer>;
-      break
-      case 'MyWall':
-      intou= <MyWall></MyWall>;
-      break
-      /*case 'PersonalProfile':
-      intou= <PersonalProfile></PersonalProfile>
-      break*/
-      case 'Connection':
-      intou= <ConnectionManagment searchText={this.props.searchText}></ConnectionManagment>;
-      break
-      default :
-      intou= <PostContainer></PostContainer>;
-    };
-
-
-    if(this.state.logedIn===null)
-    {return (
-      <Container fluid="true" style={{height:"100%" }}>
-      <div style={{height:'50%'}}></div>
-      <img src='loading.gif' align="middle" alt='Loading'
-        style={{
-          width:'100px',height:'100px',
-          margin: '-50px auto 20px',
-          display: 'block'
-        }}></img>
-        
-      </Container>
-      )}
-
-    if(this.state.logedIn===true)
-    {
+  setPage(eve) {
+    this.setState({ pageContent: eve })
+  }
+  render() {
+    if (this.state.logedIn === null) {
       return (
-          
-    <Container fluid="true" style={{height:"100%" ,padding:'0'}}>
+        <div style={{ height: "100%", width: "100%" }}>
+          <div style={{ height: '50%' }}></div>
+          <img src='loading.gif' align="middle" alt='Loading'
+            style={{
+              width: '100px', height: '100px',
+              margin: '-50px auto 20px',
+              display: 'block'
+            }}></img>
+        </div>
+      )
+    }
+
+    if (this.state.logedIn === true) {
+      return (
+        <Layout style={{ height: '100%' }}>
+          <UserSideBar setPage={this.setPage}
+            logout={this.logout}></UserSideBar>
+          <Layout style={{minWidth:'320px'}}>
+            <Content style={{ margin: '10px' }}>
+              {this.state.pageContent}
+            </Content>
+          </Layout>
+          <Sider
+            style={{ backgroundColor: 'white' }}
+            breakpoint='md'
+            width='200px'
+            collapsedWidth="0"
+            onBreakpoint={(broken) => { console.log(broken); }}
+            onCollapse={(collapsed, type) => { console.log(collapsed, type); }}
+          >
+            <img width='100%' src='./img/hqdefault.jpg' alt=''></img>
+            <img width='100%' src='./img/imageseer.jpg' alt=''></img>
+            <img width='100%' src='./img/logo_large.png' alt=''></img>
+          </Sider>
+        </Layout>)
+    }
+
+
+
+    /*<Container fluid="true" style={{height:"100%" ,padding:'0'}}>
       <Row>
       </Row>
         <Container fluid="true" >
@@ -119,10 +109,6 @@ class MainPage extends Component {
               key='right'
               placement={'right'}
               overlay={
-                /*<Popover
-                    id={`popover-positioned-right`}
-                    title={`Popover`}
-                  >*/
                     <UserSideBar 
                         logout={this.logout} 
                         logedIn={this.state.logedIn}
@@ -130,7 +116,6 @@ class MainPage extends Component {
                           this.setState({page:page})
                         }}    
                     ></UserSideBar>
-                  //</Popover>
                 }
               >
               <Button style={{padding:'0'}}>
@@ -164,20 +149,21 @@ class MainPage extends Component {
         </Row>
       </Container>
     </Container>
-    )}
-    else if(this.state.logedIn===false)
-    {return (
-      <Container fluid="true" style={{height:"100%" }}>
-        <Row style={{height:'30%'}} ></Row>
-        <Row>
-          <Col md={{ span: 6, offset: 3 }}>
-            <LoginForm setLoginState={(st)=>{this.setState({logedIn:st})}}></LoginForm>
-          </Col>
+    )}*/
+    else if (this.state.logedIn === false) {
+      return (
+        <div style={{ height: "100%", width: '100%' }}>
+          <Row style={{ height: '30%' }} ></Row>
+          <Row>
+            <Col md={{ span: 6, offset: 9 }}>
+              <LoginForm setLoginState={(st) => { this.setState({ logedIn: st }) }}></LoginForm>
+            </Col>
           </Row>
-      </Container>
-      )}
+        </div>
+      )
+    }
 
-   }
+  }
 }
 
 export default MainPage;

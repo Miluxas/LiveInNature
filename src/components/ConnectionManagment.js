@@ -1,27 +1,19 @@
 import React, { Component } from 'react'
-import {Col,Tabs,Tab} from 'react-bootstrap'
 import SendedConnections from './SendedConnections';
 import ReceivedConnections from './ReceivedConnections';
 import SearchUser from './SearchUser';
+import { Tabs } from 'antd';
 
 
 class ConnectionManagment extends Component {
 
   render() {
     return (
-        <Col>
-        <Tabs>
-            <Tab eventKey="sendedConnections" title="Sended Connections">
-                <SendedConnections></SendedConnections>
-            </Tab>
-            <Tab eventKey="receivedConnections" title="Received Connections">
-                <ReceivedConnections></ReceivedConnections>
-            </Tab>
-            <Tab eventKey="searchUser" title="Search Users">
-               <SearchUser></SearchUser>
-            </Tab>
+        <Tabs defaultActiveKey="1" size='small'>
+            <Tabs.TabPane tab="Sended Connections" key="1"><SendedConnections/></Tabs.TabPane>
+            <Tabs.TabPane tab="Received Connections" key="2"><ReceivedConnections/></Tabs.TabPane>
+            <Tabs.TabPane tab="Search Users" key="3"><SearchUser/></Tabs.TabPane>
         </Tabs>
-        </Col>
     )}
 }
 

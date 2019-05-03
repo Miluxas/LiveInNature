@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import '../style.css';
 import { connect } from 'react-redux'
 import { getVal, firestoreConnect } from 'react-redux-firebase'
 import { compose } from 'recompose'
+import { Avatar,Row} from 'antd';
 
 class UserLogo extends Component {
 
@@ -11,13 +11,16 @@ class UserLogo extends Component {
         {
             if(this.props.size<50)
             return (
-                
-                    <img src={this.props.user.imageUrl} alt={this.props.user.username} className="img-circle" style={{maxWidth:this.props.size,maxHeight:this.props.size}} />
+                <Avatar src={this.props.user.imageUrl} size={this.props.size} />
                 )
             return (
-            <div>
-                <img src={this.props.user.imageUrl} alt={this.props.user.username} className="img-circle" style={{width:this.props.size,height:this.props.size}}/>
-                <h3>{this.props.user.username}</h3>
+            <div style={{textAlign:'center'}}>
+                <Row>
+                    <Avatar src={this.props.user.imageUrl}  size={this.props.size} />
+                </Row>   
+                <Row>
+                    <label style={{textAlign:'center', overFlowWrap: 'break-word',  wordWrap: 'break-word'}}>{this.props.user.username}</label>
+                </Row>
             </div>
         )}
         return <div></div>

@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Form, Button,Row } from 'react-bootstrap'
-import '../style.css';
-
+import { Form,Input,Icon,Button} from 'antd'
 import { auth, provider, firestore} from '../firebase';
 
 class LoginForm extends Component {
@@ -54,37 +52,39 @@ class LoginForm extends Component {
 
     render() {
         return (
-            <Container fluid="true" style={{ height: "100%" }}>
-                <Row>
-                    <Form style={{width: '100%'}}>
-                        <Form.Group controlId="formGroupEmail">
-                            <Form.Label>Email address</Form.Label>
-                            <Form.Control onChange={(evt) => { this.setState({ uss: evt.target.value }) }} type="email" placeholder="Enter email" />
-                        </Form.Group>
-                        <Form.Group controlId="formGroupPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" onChange={(evt) => {
-                                this.setState({ uph: evt.target.value })
-                            }} />
-                        </Form.Group>
-                        <Button onClick={()=>this.login(null)} style={{width: '100%'}}>
-                            Login
-                        </Button>
-                    </Form>
-                    <h2>{this.state.message}</h2>
-                </Row>
-                <Row>
+            <div style={{ height: "100%", width:'100%' }}>
+                <Form onSubmit={this.handleSubmit} className="login-form">
+                    <Form.Item>
+                        <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                        onChange={(evt) => { this.setState({ uss: evt.target.value }) }} placeholder="Username" />
+                    </Form.Item>
+                    <Form.Item>
+                        <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" 
+                         onChange={(evt) => {
+                            this.setState({ uph: evt.target.value })
+                        }}  />
+                    </Form.Item>
+                    <Form.Item>
+                    <Button type="primary" className="login-form-button" onClick={()=>this.login(null)} style={{width: '100%'}}>
+                        Log in
+                    </Button>
                     <Button onClick={()=>{this.login(provider)}} style={{
                         width: '100%' , marginTop:20
                     }}>
                         Login with google account
                     </Button>
-                </Row>
+                    <Button onClick={()=>{
+                        this.setState({ uss: 'test@test.com' ,uph:'testtest' })
+                        this.login()}} style={{
+                        width: '100%' , marginTop:20
+                    }}>
+                        Login with test user
+                    </Button>
+                    </Form.Item>
+                </Form>   
 
-
-            </Container>
+            </div>
         )
     }
 }
-
 export default LoginForm;

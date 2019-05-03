@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
-import { Col, Row, InputGroup, FormControl, Button } from 'react-bootstrap'
 import { auth } from '../firebase';
 import { connect } from "react-redux"
 import { compose } from 'redux'
 import { firestoreConnect, isLoaded, isEmpty } from 'react-redux-firebase'
 import FindedUser from './FindedUser';
+import { Row,Input} from 'antd';
 
 
 class SearchUser extends Component {
@@ -27,7 +27,8 @@ class SearchUser extends Component {
                 tmpD = <div>Finded List Is Empty</div>
             } else {
                
-                tmpD = <Row>
+                tmpD = 
+                <Row type="flex" justify="start">
                     {newList.map(user => {
                         let sendCon=[];
                         if(this.props.sendedConnectionList)
@@ -45,22 +46,18 @@ class SearchUser extends Component {
 
 
         return (
-            <Col>
+            <div>
+
                 <Row>
-                    <InputGroup className="mb-3">
-                        <FormControl
-                            placeholder="Username or Email"
-                            aria-label="Username or Email"
-                            aria-describedby="basic-addon2"
-                            onChange={(evt) => { this.setState({ searchStr: evt.target.value }) }}
-                        />
-                        <InputGroup.Append>
-                            <Button variant="outline-secondary" onClick={() => { this.props.setSearchString(this.state.searchStr) }}>Search</Button>
-                        </InputGroup.Append>
-                    </InputGroup>
+                <Input.Search
+                    placeholder="Username or Email"
+                    onSearch={(string) => { this.props.setSearchString(string) 
+                                            this.setState({searchStr:string}) }}
+                    style={{ width: '100%' }}
+                    />
                 </Row>
                 {tmpD}
-            </Col>
+            </div>
         )
     }
 }

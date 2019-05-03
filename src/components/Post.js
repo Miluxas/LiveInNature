@@ -1,26 +1,26 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, InputGroup, FormControl, Button , Modal} from 'react-bootstrap'
-import '../style.css';
 import { connect } from 'react-redux'
 import { getVal } from 'react-redux-firebase'
 import { compose } from 'recompose'
 import firebase, { auth, firestore } from '../firebase';
 import UserLogo from './UserLogo';
 import MapContainer from './MapContainer'
-
+import { Input,Icon,Modal, Button,Row,List, Col} from 'antd';
 
 class Post extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            newComment: '',
             comments: [],
-            show:false
+            show:false,
+            likeState:false
         }
         this.addComment = this.addComment.bind(this)
         this.getComments = this.getComments.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleShow = this.handleShow.bind(this)
+        this.pressLike = this.pressLike.bind(this)
+        this.getLikeState = this.getLikeState.bind(this)
     }
 
     handleClose() {
@@ -32,18 +32,57 @@ class Post extends Component {
     }
 
     addComment() {
-        if (this.state.newComment === '') return;
+        let value=document.getElementById('newCommentId').value
+        if (value === '') return;
+        //document.getElementById('newCommentId').value=''
         firestore.collection('posts').doc(this.props.item.id).collection('comments').add({
             user: firebase.firestore().doc(`users/${auth.currentUser.uid}`),// firebase.firestore.DocumentReference(`users/${auth.currentUser.uid}`),
-            content: this.state.newComment,
+            content: value,
             createAt: new Date()
         }).then(() => {
-            this.setState({ newComment: '' })
             this.getComments()
             firestore.collection('posts').doc(this.props.item.id).update({
                 "commentCount": this.props.item.commentCount + 1,
             })
+            
+        })
+        document.getElementById('newCommentId').value=''
+    }
 
+    pressLike() {
+        firestore.collection('posts').doc(this.props.item.id).collection('likes').where('userId','==',`${auth.currentUser.uid}`).get().then((snapshot)=>{
+            //console.log(snapshot.docs.length>0)
+            if(snapshot.docs.length>0){
+                snapshot.forEach(doc => {
+                    firestore.collection('posts').doc(this.props.item.id).collection('likes').doc(doc.id).delete().then(()=>{
+                        firestore.collection('posts').doc(this.props.item.id).update({
+                            "postLikeCount": this.props.item.postLikeCount - 1,
+                        })
+                        this.setState({likeState:false})
+                        //postLikeCount
+                    })
+                });
+                //firestore.collection('posts').doc(this.props.item.id).collection('likes').doc(auth.currentUser.uid).delete()
+            }else{
+                firestore.collection('posts').doc(this.props.item.id).collection('likes').add({userId:auth.currentUser.uid}).then(()=>{
+                    firestore.collection('posts').doc(this.props.item.id).update({
+                        "postLikeCount": this.props.item.postLikeCount + 1,
+                    })
+                    this.setState({likeState:true})
+                    //postLikeCount
+                })
+            }
+        })
+    }
+
+    getLikeState() {
+        firestore.collection('posts').doc(this.props.item.id).collection('likes').where('userId','==',`${auth.currentUser.uid}`).get().then((snapshot)=>{
+            //console.log(snapshot.docs.length>0)
+            if(snapshot.docs.length>0){
+                this.setState({likeState:true})
+            }else{
+                this.setState({likeState:false})
+            }
         })
     }
 
@@ -64,80 +103,75 @@ class Post extends Component {
     }
 
     componentDidMount() {
+        this.getLikeState();
         this.getComments();
     }
 
     render() {
 
         return (
-            <Container className="card-post" style={{ borderRadius: '5px', backgroundColor: '#ffffff80' }}>
-                <Row>
-                    <Col xs={12} sm={3} lg={2}>
-                        <UserLogo userId={this.props.item.owner_uid} size={80}></UserLogo>
+            <Row style={{margin:'5px',borderRadius:'5px',background: '#fff'}}>
+                <Col  xs={4} sm={4} md={3} lg={2} xl={2} style={{background: '#fff',borderRadius:'5px',paddingTop:'10px'}}>
+                    <UserLogo userId={this.props.item.owner_uid} size={50}></UserLogo>
+                </Col>
+                <Col  xs={20} sm={20} md={21} lg={22} xl={22} style={{ background: '#fff',borderRadius:'5px',padding:'5px' }}>
+                    <p style={{ display: 'None' }}>{this.props.item.commentCount}</p>
+                    <img src={this.props.item.imageUrl} alt={this.props.item.userFullname} style={{borderRadius:'5px'}} width='100%'/>
 
-                    </Col>
-                    <Col xs={12} sm={9} lg={10}>
-                        <p style={{ display: 'None' }}>{this.props.item.commentCount}</p>
-                        <img src={this.props.item.imageUrl} alt={this.props.item.userFullname} />
+                    <p>{this.props.item.content}</p>
+                    <div className="reaction"> 	
+                        {this.state.likeState?<Icon type="heart" theme="twoTone" twoToneColor="#eb2f96" onClick={this.pressLike}/>:
+                        <Icon type="heart" onClick={this.pressLike}/>}
+                        {this.props.item.postLikeCount}
 
-                        <p>{this.props.item.content}</p>
-                        <div className="reaction">
-                            <img draggable="false" className="emoji" alt="❤" src="https://twemoji.maxcdn.com/16x16/2764.png"
-                            /> {this.props.item.postLikeCount}
+                        {this.props.item.location ?
+                            <Icon type="environment" theme="twoTone"  onClick={this.handleShow}/> : ""}
+                        <Modal
+                            title="Location"
+                            centered
+                            visible={this.state.show}
+                            onOk={this.handleClose}
+                            onCancel={this.handleClose}
+                            footer={[]}
+                            >
+                                <MapContainer location={this.props.item.location} onSelectLocation={this.onSelectLocation}></MapContainer>
+                        </Modal>
 
-                            {this.props.item.location ?
-                                <i className="fas fa-map-marker-alt" style={{ fontSize: "15px", color: 'Green' }} onClick={this.handleShow} ></i> : ""}
-                            <Modal show={this.state.show} onHide={this.handleClose}
-                                size="lg"
-                                aria-labelledby="example-modal-sizes-title-lg"
-                                centered>
-                                <Modal.Header closeButton>
-                                    <Modal.Title id="example-modal-sizes-title-lg">
-                                        Location
-                            </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                    <Container>
-                                        <MapContainer location={this.props.item.location} onSelectLocation={this.onSelectLocation}></MapContainer>
-                                    </Container>
-                                </Modal.Body>
-                            </Modal>
-
-                        </div>
+                    </div>
                         <div className="comments">
-                            <InputGroup className="mb-3">
-                                <FormControl
-                                    placeholder="Comment"
-                                    aria-label="Comment"
-                                    aria-describedby="Comment"
-                                    value={this.state.newComment}
-                                    onChange={(evt) => { this.setState({ newComment: evt.target.value }) }}
+                        <Input.Group compact>
+                            <Input.TextArea
+                                autosize={{ minRows: 1, maxRows: 6 }}
+                                id="newCommentId"
+                                placeholder="Comment"
+                                style={{ width: '90%' }} />
+                            <Button onClick={value=>{
+                                this.addComment('df')
+                            }}>Add</Button>
+                        </Input.Group>
+                        <List
+                            size="small"
+                            dataSource={this.state.comments}
+                            renderItem={item => (
+                            <List.Item key={item.id}>
+                                <List.Item.Meta
+                                avatar={<UserLogo userId={item.item.user.id} size={25}></UserLogo>}
+                                title={item.item.content}
                                 />
-                                <InputGroup.Append>
-                                    <Button variant="outline-secondary" onClick={() => this.addComment()}>Add</Button>
-                                </InputGroup.Append>
-                            </InputGroup>
-                            <ul>
-                                {
-
-                                    this.state.comments.map(item => {
-                                        return <li key={item.id}><UserLogo userId={item.item.user.id} size={25}></UserLogo>   {' :  '}{item.item.content}</li>
-                                    })
-                                }
-
-                            </ul>
-
-                        </div>
-                    </Col>
-                </Row>
-            </Container>
+                                <div></div>
+                            </List.Item>
+                            )}
+                        > {/*this.state.loading && this.state.hasMore && <Spin className="demo-loading" />*/}
+                        </List>
+                    </div>
+                </Col>
+            </Row>
         )
     }
 }
 
 export default compose(
     connect(({ firestore }, props) => ({
-
         post: getVal(firestore, `data/posts/${props.item.id}`), // lodash's get can also be used
     })),
 )(Post)

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { Container } from 'react-bootstrap'
-import '../style.css'
+import { Icon } from 'antd'
 import UserLogo from './UserLogo';
 import { auth, firestore } from '../firebase';
 
@@ -24,13 +23,13 @@ class Connection extends Component {
   }
 
   acceptConnection() {
-    firestore.collection(`users/${this.props.connection.user.id}/sendedConnections`).doc(`${this.props.connection.reverseConnectionId}`).update({status:1});
-    firestore.collection(`users/${auth.currentUser.uid}/receivedConnections`).doc(`${this.props.connection.id}`).update({status:1});
+    firestore.collection(`users/${this.props.connection.user.id}/sendedConnections`).doc(`${this.props.connection.reverseConnectionId}`).update({ status: 1 });
+    firestore.collection(`users/${auth.currentUser.uid}/receivedConnections`).doc(`${this.props.connection.id}`).update({ status: 1 });
   }
 
   render() {
     return (
-      <Container style={{
+      <div style={{
         margin: 5,
         padding: 5,
         border: 'whitesmoke',
@@ -41,23 +40,27 @@ class Connection extends Component {
         width: '124px',
         height: '200px'
       }}>
-        <UserLogo key={this.props.connection.id} userId={this.props.connection.user.id}></UserLogo>
+        <div style={{ height: '165px' }}>
+          <UserLogo key={this.props.connection.id} userId={this.props.connection.user.id} size={110}></UserLogo>
+        </div>
         {(this.props.isSended) ?
-          <Container height='18' style={{ marginTop: '24px',padding:'0px'}}>
-            <i className="fas fa-user-times" style={{ fontSize: "15px", color: 'red' }} onClick={() => this.removeSendedConnection()}></i>
+          <div height='18' style={{ padding: '0px' }}>
+            <Icon type="close-circle" theme="twoTone" twoToneColor="#eb2f96" onClick={() => this.removeSendedConnection()} style={{ fontSize: '20px' }} />
             {(this.props.connection.status === 1) ?
-              <label>Accepted</label> : <label>Pending</label>
+              <Icon type="check-circle" style={{ fontSize: '20px' }} /> :
+              <Icon type="clock-circle" style={{ fontSize: '20px' }} />
             }
-          </Container>
+          </div>
           :
-          <Container height='18' style={{ marginTop: '24px',padding:'0px' }}>
-            <i className="fas fa-user-times" style={{ fontSize: "15px", color: 'red' }} onClick={() => this.removeReceivedConnection()}></i>
+          <div height='18' style={{ marginTop: '24px', padding: '0px' }}>
+            <Icon type="close-circle" theme="twoTone" twoToneColor="#eb2f96" onClick={() => this.removeReceivedConnection()} style={{ fontSize: '20px' }} />
             {(this.props.connection.status === 1) ?
-              <label>Accepted</label> : <i className="fas fa-user-check" style={{ fontSize: "15px", color: 'orange' }} onClick={()=>this.acceptConnection()}></i>
+              <Icon type="check-circle" style={{ fontSize: '20px' }} /> :
+              <Icon type="check-circle" theme="twoTone" onClick={() => this.acceptConnection()} style={{ fontSize: '20px' }} />
             }
-          </Container>
+          </div>
         }
-      </Container>
+      </div>
     )
   }
 }

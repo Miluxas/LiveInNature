@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
-import { Container } from 'react-bootstrap'
-import '../style.css'
 import UserLogo from './UserLogo';
 import { auth, firestore } from '../firebase';
+import {Icon} from 'antd'
 
 class FindedUser extends Component {
   constructor(props) {
@@ -36,7 +35,7 @@ class FindedUser extends Component {
   }
   render() {
     return (
-      <Container style={{ 
+      <div style={{ 
         margin: 5, 
         padding: 5, 
         border:'whitesmoke',
@@ -46,16 +45,18 @@ class FindedUser extends Component {
         borderWidth:'2px' , 
         width: '124px', 
         height: '200px' }}>
-        <UserLogo key={this.props.user.id} userId={this.props.user.id}></UserLogo>
-        <Container height='18' style={{ marginTop: '24px',padding:'0px'}}>
+        <div style={{height:'165px'}}>
+        <UserLogo key={this.props.user.id} userId={this.props.user.id} size={110}></UserLogo>
+        </div>
+        <div height='18' style={{padding:'0px'}}>
           {this.props.sendCon.length === 0 ?
-            <i className="fas fa-user-plus" style={{ fontSize: "15px", color: 'blue' }} onClick={() => this.addConnection()}></i>
+            <Icon type="plus-circle" theme="twoTone" onClick={() => this.addConnection()} style={{fontSize:'20px'}}/>
             :
-            <i className="fas fa-user-times" style={{ fontSize: "15px", color: 'red' }} onClick={() => this.removeConnection()}></i>
+            <Icon type="close-circle" theme="twoTone"  twoToneColor="#eb2f96" onClick={() => this.removeConnection()}  style={{fontSize:'20px'}}/>
           }
 
-        </Container>
-      </Container>
+        </div>
+      </div>
     )
   }
 }

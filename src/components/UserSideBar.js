@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-
 import { auth } from '../firebase';
-import { Container, Modal,ListGroup } from 'react-bootstrap'
-import '../style.css';
 import AddNewPost from './AddNewPost'
 import { getVal, firestoreConnect } from 'react-redux-firebase'
 import { compose } from 'recompose'
 import UserProfileUpdate from './UserProfileUpdate';
+import { Layout, Menu, Icon, Avatar, Modal, Button } from 'antd';
+import PostContainer from './PostContainer';
+import MyWall from './MyWall';
+import ConnectionManagment from './ConnectionManagment';
+const { Sider } = Layout;
 
 class UserSideBar extends Component {
   constructor(props) {
@@ -15,81 +17,115 @@ class UserSideBar extends Component {
     super(props)
     this.state = {
       user: null,
-      userProfileModalShow: false
+      userProfileModalShow: false,
+      menuDefaultSelectedKey: "2"
     }
-    this.closeModal = this.closeModal.bind(this)
     this.closeUserProfileModal = this.closeUserProfileModal.bind(this)
+    this.mAddNewPost = this.mAddNewPost.bind(this)
+    this.mShowLocationSellector = this.mShowLocationSellector.bind(this)
   }
   componentWillReceiveProps(props) {
     this.setState({ user: props.user })
   }
-  closeModal() {
-    this.setState({ lgShow: false })
-  }
-  closeUserProfileModal() {
-    this.setState({ userProfileModalShow: false })
-  }
 
-  buttonStyle={padding:'3px'}
+  closeUserProfileModal() {
+    this.setState({ userProfileModalShow: false, menuDefaultSelectedKey: "2" })
+  }
+  mAddNewPost() {
+    this.refs.addNewPost.addPost()
+    this.setState({ menuDefaultSelectedKey: "2" })
+  }
+  mShowLocationSellector() {
+    this.refs.addNewPost.showLocationSelector()
+  }
+  buttonStyle = { padding: '3px' }
 
   render() {
-    let lgClose = () => this.setState({ lgShow: false });
-
     if (this.state.user == null)
       return <div></div>
     //console.log(auth.currentUser)
     return (
-      <Container className="sidebar-nav" style={{overflowY: 'auto',overflowX:'hidden',height:'100%',background:'#009cff4d'}}>
-        <div style={{ height: '30' }}>
-        <img src='liveInNature.png' alt='Live In Nature Logo'></img>
-        </div>
-        <Container style={{ borderRadius: 10 }}>
-          <img src={this.state.user.imageUrl} alt={this.state.user.username} className="img-circle" width="200" height="200" />
-          <h2 className="text-center hidden-xs">{this.state.user.username ? this.state.user.username : this.state.user.email}</h2>
-          <p className="text-center user-description hidden-xs">
-            <i>{this.state.user.description}</i>
-          </p>
-
-        <ListGroup>
-          <ListGroup.Item action style={this.buttonStyle} onClick={() => this.setState({ lgShow: true })}>New Post</ListGroup.Item>
-          <ListGroup.Item action style={this.buttonStyle} onClick={()=>{ this.props.changePage('PostContainer')}}>Main Wall</ListGroup.Item>
-          <ListGroup.Item action style={this.buttonStyle} onClick={()=>{ this.props.changePage('MyWall')}}>My Wall</ListGroup.Item>
-          <ListGroup.Item action style={this.buttonStyle} onClick={()=>{ this.props.changePage('Connection')}}>Connections</ListGroup.Item>
-          <ListGroup.Item action style={this.buttonStyle} onClick={() => { this.setState({ userProfileModalShow: true }) }}>Profile</ListGroup.Item>
-          <ListGroup.Item action style={this.buttonStyle}>Setting</ListGroup.Item>
-          <ListGroup.Item action style={this.buttonStyle} onClick={this.props.logout}>Logout</ListGroup.Item>
-        </ListGroup>
-
-        </Container>
-
+      <Sider  
+        //trigger={null}
+        //collapsible
+        //collapsed={this.state.collapsed}
+        breakpoint="lg"
+        collapsedWidth="0"
+        onBreakpoint={(broken) => { console.log(broken); }}
+        onCollapse={(collapsed, type) => { console.log(collapsed, type); }}
+        style={{ zIndex: 1200 }}
+      >
         <Modal
-          size="lg"
-          show={this.state.lgShow}
-          onHide={lgClose}
-          aria-labelledby="example-modal-sizes-title"
+          title="Add New Post"
+          width={'60%'}
+          centered
+          visible={this.state.userProfileModalShow}
+          onOk={() => this.closeUserProfileModal(false)}
+          onCancel={() => this.closeUserProfileModal(false)}
+          footer={[
+            <Button key="addlocation" onClick={this.mShowLocationSellector}>Add Location</Button>,
+            <Button key="add" type="primary" onClick={this.mAddNewPost}>Add</Button>,
+          ]}
         >
-          <Modal.Header closeButton>
-            <Modal.Title id="example-modal-sizes-title">
-              Add New Post
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body><AddNewPost closeModal={lgClose}></AddNewPost></Modal.Body>
+          <AddNewPost ref="addNewPost" closeModal={this.closeUserProfileModal}></AddNewPost>
         </Modal>
+        <div className="logo" />
+        <Menu mode="inline" selectedKeys={[this.state.menuDefaultSelectedKey]} defaultSelectedKeys={["2"]} style={{ height: '100%' }}>
+          <div style={{ textAlign: 'center' }}>
+            <img src='liveInNature.png' alt='Live In Nature Logo' width='140px'></img>
+            <Avatar size={70} src={this.state.user.imageUrl} />
+          </div>
+          <Menu.Item key="1" onClick={() => {
+            this.setState({ menuDefaultSelectedKey: "1" })
+            this.setState({ userProfileModalShow: true })
+          }}>
+            <Icon type="form" />
+            <span className="nav-text">Add New Post</span>
+          </Menu.Item>
 
-        <Modal
-          size="lg"
-          show={this.state.userProfileModalShow}
-          onHide={this.closeUserProfileModal}
-          aria-labelledby="example-modal-sizes-title"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title id="example-modal-sizes-title">
-              User Profile
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body><UserProfileUpdate user={this.state.user} onCloseUserProfileModal={this.closeUserProfileModal}></UserProfileUpdate></Modal.Body>
-        </Modal>
-      </Container>
+          <Menu.Item key="2" onClick={() => {
+            this.setState({ menuDefaultSelectedKey: "2" })
+            this.props.setPage(<PostContainer />)
+          }}>
+            <Icon type="home" />
+            <span className="nav-text">Main Wall</span>
+          </Menu.Item>
+
+          <Menu.Item key="3" onClick={() => {
+            this.setState({ menuDefaultSelectedKey: "3" })
+            this.props.setPage(<MyWall />)
+          }}>
+            <Icon type="bars" />
+            <span className="nav-text">My Wall</span>
+          </Menu.Item>
+
+          <Menu.Item key="4" onClick={() => {
+            this.setState({ menuDefaultSelectedKey: "4" })
+            this.props.setPage(<ConnectionManagment />)
+          }}>
+            <Icon type="usergroup-add" />
+            <span className="nav-text">Connections</span>
+          </Menu.Item>
+
+          <Menu.Item key="5" onClick={() => {
+            this.setState({ menuDefaultSelectedKey: "5" })
+            this.props.setPage(<UserProfileUpdate user={this.state.user} />)
+          }}>
+            <Icon type="profile" />
+            <span className="nav-text">Profile</span>
+          </Menu.Item>
+
+          <Menu.Item key="6" onClick={this.setPage}>
+            <Icon type="setting" />
+            <span className="nav-text">Setting</span>
+          </Menu.Item>
+
+          <Menu.Item key="7" onClick={this.props.logout}>
+            <Icon type="logout" />
+            <span className="nav-text">Logout</span>
+          </Menu.Item>
+        </Menu>
+      </Sider>
     )
   }
 }

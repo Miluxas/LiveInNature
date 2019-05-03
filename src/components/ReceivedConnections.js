@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Col, Row } from 'react-bootstrap'
+import { Row } from 'antd'
 import Connection from './Connection';
 import { auth } from '../firebase';
 import { connect } from "react-redux"
@@ -17,13 +17,12 @@ class ReceivedConnections extends Component {
     }
 
     return (
-      <Col style={{ width: '100%' }}>
-        <Row>
+      <Row type="flex" justify="start">
           {this.props.receivedConnectionList.map(connection => {
             return <Connection key={connection.id} connection={connection} isSended={false}></Connection> 
           })}
-        </Row>
-      </Col>
+      </Row>
+
     )
   }
 }

@@ -1,5 +1,4 @@
 import React from 'react';
-import './style.css';
 import MainPage from './MainPage';
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
@@ -7,6 +6,7 @@ import { createStore, combineReducers} from 'redux'
 import { ReactReduxFirebaseProvider, firebaseReducer } from 'react-redux-firebase'
 import { createFirestoreInstance, firestoreReducer } from 'redux-firestore' // <- needed if using firestore
 import firebase from './firebase'
+import "antd/dist/antd.css"
 
 import { reducer as localReducer, initialState as localInitial } from './localReducer'
 
