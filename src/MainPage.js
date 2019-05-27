@@ -85,8 +85,8 @@ class MainPage extends Component {
             breakpoint='md'
             width='200px'
             collapsedWidth="0"
-            onBreakpoint={(broken) => { console.log(broken); }}
-            onCollapse={(collapsed, type) => { console.log(collapsed, type); }}
+            //onBreakpoint={(broken) => { console.log(broken); }}
+            //onCollapse={(collapsed, type) => { console.log(collapsed, type); }}
           >
             <img width='100%' src='./img/hqdefault.jpg' alt=''></img>
             <img width='100%' src='./img/imageseer.jpg' alt=''></img>

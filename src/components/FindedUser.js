@@ -15,12 +15,12 @@ class FindedUser extends Component {
     // add connection to finded user receivedConnections collection
     firestore.collection(`users/${this.props.user.id}/receivedConnections`).add({
       status: 0,
-      user: firestore.doc(`users/${auth.currentUser.uid}`),
+      userUid: auth.currentUser.uid,
     }).then((con) => {
       // add connection to current user sendedConnections collection
       firestore.collection(`users/${auth.currentUser.uid}/sendedConnections`).add({
         status: 0,
-        user: firestore.doc(`users/${this.props.user.id}`),
+        userUid: this.props.user.id,
         reverseConnectionId:con.id
       }).then((rCon)=>{
         firestore.collection(`users/${this.props.user.id}/receivedConnections`).doc(`${con.id}`).update({reverseConnectionId:rCon.id})

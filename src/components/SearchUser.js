@@ -32,7 +32,7 @@ class SearchUser extends Component {
                     {newList.map(user => {
                         let sendCon=[];
                         if(this.props.sendedConnectionList)
-                            sendCon=this.props.sendedConnectionList.filter(con=>(con.user.id===user.id))
+                            sendCon=this.props.sendedConnectionList.filter(con=>(con.userUid===user.id))
                         return <FindedUser  key={user.id}
                                             user={user} 
                                             sendCon={sendCon}>
